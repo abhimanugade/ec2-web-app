@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Multi-Page Website</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+    header {
+      background: #172554;
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    header h1 { margin: 0; font-size: 22px; }
+    nav { display: flex; gap: 10px; flex-wrap: wrap; }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 9px 13px;
+      border-radius: 6px;
+    }
+    nav a:hover, nav a.active { background: #2563eb; }
+    main {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      min-height: 55vh;
+    }
+    .card {
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+    }
+    h2 { margin-top: 0; color: #172554; }
+    p { line-height: 1.7; }
+    .button {
+      display: inline-block;
+      margin-top: 10px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      padding: 11px 16px;
+      border-radius: 6px;
+    }
+    .button:hover { background: #1d4ed8; }
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+    }
+    form { display: grid; gap: 12px; max-width: 480px; }
+    input, textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font: inherit;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    button {
+      width: fit-content;
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+    }
+    @media (max-width: 520px) {
+      header { align-items: flex-start; flex-direction: column; }
+      main { margin: 24px auto; }
+      .card { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My Website</h1>
+    <nav aria-label="Main navigation">
+      <a href="/" data-route="/">Home</a>
+      <a href="/about" data-route="/about">About</a>
+      <a href="/contact" data-route="/contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="app" aria-live="polite"></main>
+
+  <footer>© <span id="year"></span> My Website</footer>
+
+  <script>
+    const pages = {
+      "/": `
+        <section class="card">
+          <h2>Welcome Home!</h2>
+          <p>This is the Home page of a simple website built with HTML, CSS, and JavaScript.</p>
+          <p>Use the navigation menu to visit the About and Contact pages.</p>
+          <a class="button" href="/about" data-route="/about">Learn More</a>
+        </section>
+      `,
+      "/about": `
+        <section class="card">
+          <h2>About Us</h2>
+          <p>This is the About page. It explains what this sample website is about.</p>
+          <p>The page content changes through simple JavaScript routing, without a full browser reload.</p>
+          <a class="button" href="/contact" data-route="/contact">Contact Us</a>
+        </section>
+      `,
+      "/contact": `
+        <section class="card">
+          <h2>Contact Us</h2>
+          <p>Send a sample message using the form below.</p>
+          <form id="contact-form">
+            <label>
+              Your name
+              <input type="text" name="name" placeholder="Enter your name" required />
+            </label>
+            <label>
+              Your email
+              <input type="email" name="email" placeholder="Enter your email" required />
+            </label>
+            <label>
+              Message
+              <textarea name="message" placeholder="Write your message" required></textarea>
+            </label>
+            <button class="button" type="submit">Submit</button>
+          </form>
+          <p id="form-message" role="status"></p>
+        </section>
+      `
+    };
+
+    function renderPage(path) {
+      const normalizedPath = path.replace(/\/+$/, "") || "/";
+      const pagePath = pages[normalizedPath] ? normalizedPath : "/";
+      document.getElementById("app").innerHTML = pages[pagePath];
+
+      document.querySelectorAll("nav a[data-route]").forEach(link => {
+        const isActive = link.dataset.route === pagePath;
+        link.classList.toggle("active", isActive);
+        if (isActive) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
+      });
+
+      const form = document.getElementById("contact-form");
+      if (form) {
+        form.addEventListener("submit", event => {
+          event.preventDefault();
+          document.getElementById("form-message").textContent =
+            "Thanks! This demo form is not connected to a backend.";
+          form.reset();
+        });
+      }
+    }
+
+    document.addEventListener("click", event => {
+      const link = event.target.closest("a[data-route]");
+      if (!link) return;
+      event.preventDefault();
+      const path = link.dataset.route;
+      history.pushState({}, "", path);
+      renderPage(path);
+    });
+
+    window.addEventListener("popstate", () => renderPage(location.pathname));
+    document.getElementById("year").textContent = new Date().getFullYear();
+    renderPage(location.pathname);
+  </script>
+</body>
+</html>
