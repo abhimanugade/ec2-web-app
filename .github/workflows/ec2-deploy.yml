@@ -1,4 +1,4 @@
-name: Deploy webapp to EC2
+name: Deploy web-app to EC2
 on: push
 
 jobs:
